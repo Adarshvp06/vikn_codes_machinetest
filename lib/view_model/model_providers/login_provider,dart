@@ -1,0 +1,44 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class LoginProvider with ChangeNotifier {
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  Future<void> login(String username, String password) async {
+    const url = 'https://api.accounts.vikncodes.com/api/v1/users/login';
+
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'is_mobile': true,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+         
+      } else {
+        final data = jsonDecode(response.body);
+        _errorMessage = data['message'] ?? 'Login failed';
+      }
+    } catch (e) {
+      _errorMessage = 'Something went wrong. Please try again.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+}
